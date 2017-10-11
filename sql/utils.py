@@ -10,13 +10,15 @@ SESSION = sessionmaker()
 
 def create_all_tables(url):
     """Create all tables of type Base."""
-    Base.metadata.create_all(bind=create_engine(url))
+    engine = create_engine(url)
+    Base.metadata.create_all(bind=engine)
+    return engine
 
 
 @contextmanager
-def session_scope(url):
+def session_scope(engine):
     """Provide a transactional scope around a series of operations."""
-    session = SESSION(bind=create_engine(url))
+    session = SESSION(bind=engine)
     try:
         yield session
         session.commit()
