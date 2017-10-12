@@ -1,7 +1,7 @@
 """Tests for sql.utils module."""
 import pytest
 from mock import Mock
-from sql.utils import scoped_session
+from examlib.sql.utils import scoped_session
 
 
 def test_scoped_session():
