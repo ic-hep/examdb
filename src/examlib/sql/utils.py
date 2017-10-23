@@ -2,31 +2,35 @@
 import logging
 from contextlib import contextmanager
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from .tables import Base
+from sqlalchemy.orm import sessionmaker, scoped_session
 
+
+__all__ = ('db_session',)
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+SESSION = scoped_session(sessionmaker())
 
-def create_all_tables(url):
-    """Create all tables of type Base."""
-    engine = create_engine(url)
-    Base.metadata.create_all(bind=engine)
-    return sessionmaker(bind=engine)
+
+def rebind_session(engine):
+    """Rebind the scoped session's engine."""
+    SESSION.remove()
+    SESSION.configure(bind=engine)
 
 
 @contextmanager
-def scoped_session(session_factory, reraise=True):
+def db_session(url=None, reraise=True):
     """Provide a transactional scope around a series of operations."""
-    session = session_factory()
+    if url is not None:
+        rebind_session(create_engine(url))
+
     try:
-        yield session
-        session.commit()
-    except:
+        yield SESSION()
+        SESSION.commit()
+    except:  # pylint: disable=bare-except
         logger.exception("Problem with DB session, rolling back.")
-        session.rollback()
+        SESSION.rollback()
         if reraise:
             raise
     finally:
-        session.close()
+        SESSION.remove()
