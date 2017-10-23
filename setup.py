@@ -3,7 +3,7 @@
 import sys
 from setuptools import setup, find_packages
 
-REQUIRES = ['sqlalchemy']
+REQUIRES = ['sqlalchemy', 'openpyxl']
 REQUIRES2 = ['python-ldap']
 REQURIES3 = ['pyldap']
 
